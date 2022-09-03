@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-"""Defines a class TestHBNBCommandDocs for HBNBCommand class/ console"""
 from console import HBNBCommand
 import unittest
 from unittest.mock import create_autospec, patch
@@ -257,6 +255,7 @@ class TestMyCLI(unittest.TestCase):
 
         """
         <class name>.update(<id>, <attribute name>, <attribute value>)
+
         method
         """
 

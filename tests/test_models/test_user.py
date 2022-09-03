@@ -1,96 +1,56 @@
 #!/usr/bin/python3
-""" Defines a class TestUser for User module. """
+""" doctest unittest """
 import unittest
+import pep8
 from models.user import User
-from models.base_model import BaseModel
-import datetime
+import os
 
 
-class TestUser(unittest.TestCase):
-    """Defines tests for User Class"""
+class TestBase(unittest.TestCase):
+    """ test """
+
+    def test_pep8(self):
+        """ test pep8 """
+        style = pep8.StyleGuide(quiet=True)
+        file_user = "models/user.py"
+        file_test_user = "tests/test_models/test_user.py"
+        check = style.check_files([file_user, file_test_user])
+        self.assertEqual(check.total_errors, 0,
+                         "Found code style errors (and warning).")
 
     @classmethod
-    def setUp(cls):
-        """Runs for each test case.
+    def setUpClass(cls):
+        """ first set up
+        check = style.check_files([file_user, file_test_user])
         """
-        cls.user1 = User()
-        cls.user1.name = "Wendy"
+        cls.ins = User()
 
     @classmethod
-    def tearDown(cls):
-        """Cleans up after each test.
-        """
-        del cls.user1
+    def teardown(cls):
+        """ final statement """
+        del cls.ins
+        try:
+            os.remove("file.json")
+        except:
+            pass
 
-    def test_class_exists(self):
-        """Tests if class exists.
-        """
-        result = "<class 'models.user.User'>"
-        self.assertEqual(str(type(self.user1)), result)
+    def test_Userdoc(self):
+        """ test base model documentation
+        self.assertNotEqual(len(models.__doc__), 0)
+        self.assertNotEqual(len(models.base_model.__doc__), 0)
 
-    def test_inheritance(self):
-        """Test if User is a subclass and instace of BaseModel.
         """
-        self.assertIsInstance(self.user1, User)
-        self.assertEqual(type(self.user1), User)
-        self.assertEqual(issubclass(self.user1.__class__, BaseModel), True)
+        self.assertNotEqual(len(User.__doc__), 0)
 
-    def test_types(self):
-        """Test if attributes type is correct.
-        """
-        self.assertIsInstance(self.user1.id, str)
-        self.assertEqual(type(self.user1.id), str)
-        self.assertIsInstance(self.user1.created_at, datetime.datetime)
-        self.assertIsInstance(self.user1.updated_at, datetime.datetime)
-        self.assertIsInstance(self.user1.first_name, str)
-        self.assertIsInstance(self.user1.last_name, str)
-        self.assertIsInstance(self.user1.email, str)
-        self.assertIsInstance(self.user1.password, str)
+    def test_BaseModelAttr(self):
+        """ test basemodel attributes """
+        self.assertEqual(hasattr(self.ins, "email"), True)
+        self.assertEqual(hasattr(self.ins, "password"), True)
+        self.assertEqual(hasattr(self.ins, "first_name"), True)
+        self.assertEqual(hasattr(self.ins, "last_name"), True)
 
-    def test_save(self):
-        """Test if save method is working correctly after update.
-        """
-        self.user1.save()
-        self.assertNotEqual(self.user1.created_at, self.user1.updated_at)
-
-    def test_functions(self):
-        """Test if User module is documented.
-        """
-        self.assertIsNotNone(User.__doc__)
-
-    def test_has_attributes(self):
-        """Test if expected attributes exist.
-        """
-        self.assertTrue(hasattr(self.user1, 'id'))
-        self.assertTrue(hasattr(self.user1, 'created_at'))
-        self.assertTrue(hasattr(self.user1, 'updated_at'))
-        self.assertTrue(hasattr(self.user1, 'first_name'))
-        self.assertTrue(hasattr(self.user1, 'last_name'))
-        self.assertTrue(hasattr(self.user1, 'email'))
-        self.assertTrue(hasattr(self.user1, 'password'))
-
-    def test_to_dict(self):
-        """Test if to_dict method is working correctly.
-        """
-        my_model_json = self.user1.to_dict()
-        self.assertEqual(str, type(my_model_json['created_at']))
-        self.assertEqual(my_model_json['created_at'],
-                         self.user1.created_at.isoformat())
-        self.assertEqual(datetime.datetime, type(self.user1.created_at))
-        self.assertEqual(my_model_json['__class__'],
-                         self.user1.__class__.__name__)
-        self.assertEqual(my_model_json['id'], self.user1.id)
-
-    def test_unique_id(self):
-        """Test if each instance is created with a unique ID.
-        """
-        user2 = self.user1.__class__()
-        user3 = self.user1.__class__()
-        user4 = self.user1.__class__()
-        self.assertNotEqual(self.user1.id, user2.id)
-        self.assertNotEqual(self.user1.id, user3.id)
-        self.assertNotEqual(self.user1.id, user4.id)
-
+    def test_isinstance(self):
+        self.assertTrue(isinstance(self.ins, User))
 
 if __name__ == '__main__':
     unittest.main()
