@@ -1,90 +1,78 @@
 #!/usr/bin/python3
-"""Module defines `FileStorage` class."""
+"""Defines a class FileStorage.
+"""
 import json
+import os
+from models.base_model import BaseModel
+from models.user import User
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.place import Place
+from models.review import Review
 
 
-class FileStorage:
-    """Serialize to a JSON file and deserialize JSON file to instances."""
-
+class FileStorage():
+    """Class that serializes instances to a JSON file and deserializes
+    JSON file to instances.
+    """
     __file_path = "file.json"
     __objects = {}
 
-    def all(self):
-        """Returns the dictionary `__objects`.
+    def __init__(self):
+        """Creates new instances of class.
+        """
+        pass
 
-        Args:
-            self (object): <class '__main__.FileStorage'> instance
+    def all(self):
+        """Returns the dictionary objects.
 
         Returns:
-            __objects
+            dict: objects.
         """
-        return self.__class__.__objects
+        return self.__objects
 
     def new(self, obj):
-        """Populates `__objects`.
-
-        __objects will be populated with a key of `<obj's class name>.id`
-        format and a value of that key will be obj itself.
+        """Sets in __objects the obj with key <obj class name>.id.
 
         Args:
-            self (object): <class '__main__.FileStorage'> instance
-            obj (obj): Instance of class `obj.__class__`.
-
-        Returns:
-            None
+            obj (any): object.
         """
         key = obj.__class__.__name__ + "." + obj.id
         self.__objects[key] = obj
-        return None
 
     def save(self):
-        """Serialize `__objects` to `__file_path`.
-
-        Args:
-            self (object): <class '__main__.FileStorage'> instance
-
-        Returns:
-            None
+        """Serializes __objects to the JSON file (path: __file_path).
         """
-        serialize_me_dict = {}
-        for key in self.__objects.keys():
-            serialize_me_dict[key] = self.__objects[key].to_dict()
-        with open(self.__file_path, "w") as file:
-            json.dump(serialize_me_dict, file)
-        return None
+        dictionary = {}
+
+        for key, value in FileStorage.__objects.items():
+            dictionary[key] = value.to_dict()
+
+        with open(FileStorage.__file_path, 'w', encoding="utf-8") as myFile:
+            json.dump(dictionary, myFile)
 
     def reload(self):
-        """Deserialize from `__file_path` to `__objects`
-
-        Args:
-            self (object): <class '__main__.FileStorage'> instance
-
-        Returns:
-            None
+        """Deserializes the JSON file to __objects only if the JSON file
+        (__file_path) exists ; otherwise, do nothing. If the file doesn’t
+        exist, no exception should be raised)
         """
-        from models.user import User
-        from models.city import City
-        from models.place import Place
-        from models.state import State
-        from models.review import Review
-        from models.amenity import Amenity
-        from models.base_model import BaseModel
-
-        classes_dict = {
-            "User": User,
-            "City": City,
-            "Place": Place,
-            "State": State,
-            "Review": Review,
-            "Amenity": Amenity,
-            "BaseModel": BaseModel,
-        }
-        from models.user import User
-        from models.base_model import BaseModel
         try:
-            with open(self.__file_path, "r") as file:
-                deserialize_me = json.load(file)
-            for k, v in deserialize_me.items():
-                self.__objects[k] = classes_dict[v["__class__"]](**v)
+            with open(self.__file_path, 'r', encoding='utf-8') as myFile:
+                my_obj_dump = myFile.read()
         except Exception:
-            pass
+            return
+        objects = eval(my_obj_dump)
+        for (key, value) in objects.items():
+            objects[key] = eval(key.split('.')[0] + '(**value)')
+        self.__objects = objects
+
+    def delete(self, obj):
+        """Deletes obj from __objects
+        """
+        try:
+            key = obj.__class__.__name__ + '.' + str(obj.id)
+            del self.__objects[key]
+            return True
+        except Exception:
+            return False

@@ -1,43 +1,17 @@
-#1/usr/bin/python3
-"""Module defines User class."""
-from models import storage
-from datetime import datetime
+#!/usr/bin/python3
+"""Defines a class User that inherits from BaseModel"""
 from models.base_model import BaseModel
 
 
 class User(BaseModel):
-    """User class to create user instances."""
+    """ Class that defines properties of User """
 
     email = ""
     password = ""
     first_name = ""
     last_name = ""
-    def __init__(self, *_, **kwargs):
-        """Initialize User instances.
 
-        Args:
-            self (object): <class '__main__.User'> type object.
-
-        Returns:
-            None
+    def __init__(self, *args, **kwargs):
+        """Creates new instances of User.
         """
-        if not kwargs:
-            super().__init__(self)
-        else:
-            super().__init__(self, **kwargs)
-        return None
-
-    def save(self):
-        """Override `BaseModel` save method.
-
-        Args:
-            self (object): <class '__main__.User'> type object.
-
-        Returns:
-            None
-        """
-        self.updated_at = datetime.now()
-        self.__dict__["__class__"] = self.__class__.__name__
-        storage.new(self)
-        storage.save()
-    pass
+        super().__init__(*args, **kwargs)

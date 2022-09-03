@@ -1,138 +1,116 @@
 #!/usr/bin/python3
-"""Unit tests for 'base_model.py' module."""
-import os
-import uuid
+""" Defines a class TestBaseModel for BaseModel module. """
 import unittest
-from datetime import datetime
 from models.base_model import BaseModel
+import datetime
 
 
 class TestBaseModel(unittest.TestCase):
-    """Class to test class BaseModel."""
+    """Defines tests for Amenity Class"""
 
-    test_object = BaseModel()
-
-    def test__init__(self):
-        """Test BaseModel initial instance attributes.
-
-        1.  Check existence of attributes.
-        2.  Check type of attributes.
-        3.  Check if 'created_at' & 'updated_at' are identical.
-
-        Args:
-            self (object): Refers to current object.
-
-        Returns:
-            None.
+    @classmethod
+    def setUp(cls):
+        """Runs for each test case.
         """
-        # Check No_ 1. Check existence of attributes
-        self.assertIn("id", self.test_object.__dict__)
-        self.assertIn("created_at", self.test_object.__dict__)
-        self.assertIn("updated_at", self.test_object.__dict__)
+        cls.BaseModel1 = BaseModel()
+        cls.BaseModel1.name = "Samsung"
+        cls.BaseModel1.my_number = 89
 
-        # Check No_ 2. Check type of attributes
-        self.assertIsInstance(self.test_object.id, str)
-        self.assertIsInstance(uuid.UUID(self.test_object.id), uuid.UUID)
-        self.assertIsInstance(self.test_object.created_at, datetime)
-        self.assertIsInstance(self.test_object.updated_at, datetime)
-
-        # Check No_ 3. Check identical 'created_at' & 'updated_at'
-        self.assertEqual(self.test_object.created_at,
-                         self.test_object.updated_at)
-        return None
-
-    def test__str__(self):
-        """Test string representation of instances of BaseModel.
-
-
-        Check the output of __str__ with a regular expression.
-
-        Args:
-            self (object): Refers to current object.
-
-        Returns:
-            None
+    @classmethod
+    def tearDown(cls):
+        """Cleans up after each test.
         """
-        regex = r'\[' + self.test_object.__class__.__name__ + r'\]' +\
-            r' \(.{8}-.{4}-.{4}-.{4}-.{12}\) \{.+\}'
-        self.assertRegex(self.test_object.__str__(), regex)
-        return None
+        del cls.BaseModel1
+
+    def test_class_exists(self):
+        """Tests if class exists.
+        """
+        result = "<class 'models.base_model.BaseModel'>"
+        self.assertEqual(str(type(self.BaseModel1)), result)
+
+    def testBaseModel1(self):
+        """Test attributes value of a BaseModel instance.
+        """
+        self.BaseModel1.save()
+        my_model_json = self.BaseModel1.to_dict()
+
+        self.assertEqual(self.BaseModel1.name, my_model_json['name'])
+        self.assertEqual(self.BaseModel1.my_number, my_model_json['my_number'])
+        self.assertEqual('BaseModel', my_model_json['__class__'])
+        self.assertEqual(self.BaseModel1.id, my_model_json['id'])
+
+    def test_types(self):
+        """Test if attributes type is correct.
+        """
+        self.assertIsInstance(self.BaseModel1.name, str)
+        self.assertEqual(type(self.BaseModel1.name), str)
+        self.assertIsInstance(self.BaseModel1.id, str)
+        self.assertEqual(type(self.BaseModel1.id), str)
+        self.assertIsInstance(self.BaseModel1.created_at, datetime.datetime)
+        self.assertIsInstance(self.BaseModel1.updated_at, datetime.datetime)
 
     def test_save(self):
-        """Test save method for updated time of last modification.
-
-        Check if save method actually saves the `updated_at` attribute to be
-        later than `created_at` after a given amount of time.
-
-        Args:
-            self (object): Refers to current object.
-
-        Returns:
-            None
+        """Test if save method is working correctly after update.
         """
-        local_Test_Object = BaseModel()
-        create_time = local_Test_Object.created_at
-        local_Test_Object.save()
-        update_time = local_Test_Object.updated_at
-        self.assertGreater(update_time, create_time)
-        os.remove("file.json")
-        return None
+        self.BaseModel1.save()
+        self.assertNotEqual(self.BaseModel1.created_at,
+                            self.BaseModel1.updated_at)
+
+    def test_functions(self):
+        """Test if BaseModel moudule is documented.
+        """
+        self.assertIsNotNone(BaseModel.__doc__)
+
+    def test_has_attributes(self):
+        """Test if expected attributes exist.
+        """
+        self.assertTrue(hasattr(self.BaseModel1, 'name'))
+        self.assertTrue(hasattr(self.BaseModel1, 'id'))
+        self.assertTrue(hasattr(self.BaseModel1, 'created_at'))
+        self.assertTrue(hasattr(self.BaseModel1, 'updated_at'))
+
+    def test_set_attributes(self):
+        """Test set attributes of BaseModel.
+        """
+        self.assertEqual(self.BaseModel1.name, "Samsung")
+        self.assertEqual(self.BaseModel1.my_number, 89)
 
     def test_to_dict(self):
-        """Test `to_dict` method for valid attributes dictionary.
-
-        1.  Check if return value is of dictionary type.
-        2.  Check if all keys in returned dictionary are in __dict__.
-        3.  Check if `created_at` & `updated_at` are string types.
-        4.  Check if `__class__` key is present with correct value.
-        5.  Check string format datetimes are in correct format.
-        6.  Check when provided a dict to its object, it returns that same dict
-        with additional `__class__` attribute already set.
-
-        Args:
-            self (object): Refers to current object.
-
-        Returns:
-            None
+        """Test if to_dict method is working correctly.
         """
-        # Check No_ 1:
-        self.assertIsInstance(self.test_object.to_dict(), dict)
+        my_model_json = self.BaseModel1.to_dict()
+        self.assertEqual(str, type(my_model_json['created_at']))
+        self.assertEqual(my_model_json['created_at'],
+                         self.BaseModel1.created_at.isoformat())
+        self.assertEqual(datetime.datetime, type(self.BaseModel1.created_at))
+        self.assertEqual(my_model_json['__class__'],
+                         self.BaseModel1.__class__.__name__)
+        self.assertEqual(my_model_json['id'], self.BaseModel1.id)
 
-        # Check No_ 2:
-        for k, *_ in self.test_object.to_dict().items():
-            if k != "__class__":
-                self.assertIn(k, self.test_object.__dict__)
+    def test_unique_id(self):
+        """Test if each instance is created with a unique ID.
+        """
+        basemodel2 = self.BaseModel1.__class__()
+        basemodel3 = self.BaseModel1.__class__()
+        basemodel4 = self.BaseModel1.__class__()
+        self.assertNotEqual(self.BaseModel1.id, basemodel2.id)
+        self.assertNotEqual(self.BaseModel1.id, basemodel3.id)
+        self.assertNotEqual(self.BaseModel1.id, basemodel4.id)
 
-        # Check No_ 3:
-        self.assertIsInstance(self.test_object.to_dict()["created_at"], str)
-        self.assertIsInstance(self.test_object.to_dict()["updated_at"], str)
+    def test__str__(self):
+        """Test if __str__ method returns expected string.
+        """
+        string = str(self.BaseModel1)
+        id_test = "[BaseModel] ({})".format(self.BaseModel1.id)
+        boolean = id_test in string
+        self.assertEqual(True, boolean)
+        boolean = "updated_at" in string
+        self.assertEqual(True, boolean)
+        boolean = "created_at" in string
+        self.assertEqual(True, boolean)
+        boolean = "datetime.datetime" in string
+        self.assertEqual(True, boolean)
 
-        # Check No_4:
-        self.assertIn("__class__", list(self.test_object.to_dict().keys()))
 
-        # Check No_5:
-        create_str = self.test_object.to_dict()["created_at"]
-        update_str = self.test_object.to_dict()["created_at"]
-        format = "%Y-%m-%dT%H:%M:%S.%f"
-        try:
-            datetime.strptime(create_str, format)
-        except Exception:
-            self.assertTrue(False, msg="`created_at` is in incorect format")
-        try:
-            datetime.strptime(update_str, format)
-        except Exception:
-            self.assertTrue(False, msg="`updated_at` is in incorect format")
-
-        # Check No_ 6:
-        dictionary = {
-            "id": str(uuid.uuid4()),
-            "created_at": datetime.now().isoformat(),
-            "__class__": "BaseModel",
-            "my_number": 89,
-            "updated_at": datetime.now().isoformat(),
-            "name": "My_First_Model"
-        }
-        local_Test_Object = BaseModel(**dictionary)
-        self.assertTrue(dictionary == local_Test_Object.to_dict())
-
-        return None
+if __name__ == '__main__':
+    unittest.main()

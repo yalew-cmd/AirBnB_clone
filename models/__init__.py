@@ -1,5 +1,8 @@
 #!/usr/bin/python3
-"""__init__ module used to initialize a package."""
+"""Creates a unique file storage for the app.
+"""
+
+
 from models.engine.file_storage import FileStorage
 
 storage = FileStorage()
