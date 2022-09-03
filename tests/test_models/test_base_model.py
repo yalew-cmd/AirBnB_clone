@@ -1,92 +1,116 @@
 #!/usr/bin/python3
-""" doctest unittest """
+""" Defines a class TestBaseModel for BaseModel module. """
 import unittest
-import pep8
 from models.base_model import BaseModel
-from models import storage
-from models.engine.file_storage import FileStorage
-import os
+import datetime
 
 
-class TestBase(unittest.TestCase):
-    """ test """
-
-    def test_pep8(self):
-        """ test pep8 """
-        style = pep8.StyleGuide(quiet=True)
-        file_base_model = "models/base_model.py"
-        file_test_base_model = "tests/test_models/test_base_model.py"
-        check = style.check_files([file_base_model, file_test_base_model])
-        self.assertEqual(check.total_errors, 0,
-                         "Found code style errors (and warning).")
+class TestBaseModel(unittest.TestCase):
+    """Defines tests for Amenity Class"""
 
     @classmethod
-    def setUpClass(cls):
-        """ first set up
-        check = style.check_files([file_base_model, file_test_base_model])
+    def setUp(cls):
+        """Runs for each test case.
         """
-        cls.ins = BaseModel()
+        cls.BaseModel1 = BaseModel()
+        cls.BaseModel1.name = "Samsung"
+        cls.BaseModel1.my_number = 89
 
     @classmethod
-    def teardown(cls):
-        """ final statement """
-        del cls.ins
-        try:
-            os.remove("file.json")
-        except:
-            pass
-
-    def test_BaseModeldoc(self):
-        """ test base model documentation
-        self.assertNotEqual(len(models.__doc__), 0)
-        self.assertNotEqual(len(models.base_model.__doc__), 0)
-
+    def tearDown(cls):
+        """Cleans up after each test.
         """
-        self.assertNotEqual(len(BaseModel.__doc__), 0)
-        self.assertIsNotNone(BaseModel.__init__.__doc__)
-        self.assertIsNotNone(BaseModel.__str__.__doc__)
-        self.assertIsNotNone(BaseModel.save.__doc__)
-        self.assertIsNotNone(BaseModel.to_dict.__doc__)
+        del cls.BaseModel1
 
-    def test_BaseModelAttr(self):
-        """ test basemodel attributes """
-        self.assertEqual(hasattr(self.ins, "id"), True)
-        self.assertEqual(hasattr(self.ins, "created_at"), True)
-        self.assertEqual(hasattr(self.ins, "updated_at"), True)
+    def test_class_exists(self):
+        """Tests if class exists.
+        """
+        result = "<class 'models.base_model.BaseModel'>"
+        self.assertEqual(str(type(self.BaseModel1)), result)
 
-    def test_isinstance(self):
-        self.assertTrue(isinstance(self.ins, BaseModel))
+    def testBaseModel1(self):
+        """Test attributes value of a BaseModel instance.
+        """
+        self.BaseModel1.save()
+        my_model_json = self.BaseModel1.to_dict()
 
-    def test_save_updated_at_created_at(self):
-        self.ins.save()
-        self.assertNotEqual(self.ins.created_at, self.ins.updated_at)
-        dummy = BaseModel()
-        my_id = dummy.id
-        dummy.name = "Haroldo"
-        dummy.save()
-        storage.reload()
-        my_objs = storage.all()["BaseModel.{}".format(my_id)]
-        self.assertTrue(hasattr(my_objs, "name"))
-        self.assertTrue(my_objs.name == "Haroldo")
-        self.assertTrue(os.path.exists('file.json'))
+        self.assertEqual(self.BaseModel1.name, my_model_json['name'])
+        self.assertEqual(self.BaseModel1.my_number, my_model_json['my_number'])
+        self.assertEqual('BaseModel', my_model_json['__class__'])
+        self.assertEqual(self.BaseModel1.id, my_model_json['id'])
 
-    def test_dict(self):
-        dicto = self.ins.to_dict()
-        self.assertTrue(dicto.get("__class__"))
-        self.assertTrue(type(dicto) is dict)
-        self.assertTrue("to_dict" in dir(self.ins))
+    def test_types(self):
+        """Test if attributes type is correct.
+        """
+        self.assertIsInstance(self.BaseModel1.name, str)
+        self.assertEqual(type(self.BaseModel1.name), str)
+        self.assertIsInstance(self.BaseModel1.id, str)
+        self.assertEqual(type(self.BaseModel1.id), str)
+        self.assertIsInstance(self.BaseModel1.created_at, datetime.datetime)
+        self.assertIsInstance(self.BaseModel1.updated_at, datetime.datetime)
 
-    def test_var_storage(self):
-        my_objs = storage.all()
+    def test_save(self):
+        """Test if save method is working correctly after update.
+        """
+        self.BaseModel1.save()
+        self.assertNotEqual(self.BaseModel1.created_at,
+                            self.BaseModel1.updated_at)
 
-        self.assertTrue(type(my_objs) is dict)
-        self.assertTrue(isinstance(storage, FileStorage))
+    def test_functions(self):
+        """Test if BaseModel moudule is documented.
+        """
+        self.assertIsNotNone(BaseModel.__doc__)
 
-    def test_reload(self):
-        self.ins.save()
-        storage.reload()
-        my_dict = storage.all()
-        self.assertTrue(len(my_dict) != 0)
+    def test_has_attributes(self):
+        """Test if expected attributes exist.
+        """
+        self.assertTrue(hasattr(self.BaseModel1, 'name'))
+        self.assertTrue(hasattr(self.BaseModel1, 'id'))
+        self.assertTrue(hasattr(self.BaseModel1, 'created_at'))
+        self.assertTrue(hasattr(self.BaseModel1, 'updated_at'))
+
+    def test_set_attributes(self):
+        """Test set attributes of BaseModel.
+        """
+        self.assertEqual(self.BaseModel1.name, "Samsung")
+        self.assertEqual(self.BaseModel1.my_number, 89)
+
+    def test_to_dict(self):
+        """Test if to_dict method is working correctly.
+        """
+        my_model_json = self.BaseModel1.to_dict()
+        self.assertEqual(str, type(my_model_json['created_at']))
+        self.assertEqual(my_model_json['created_at'],
+                         self.BaseModel1.created_at.isoformat())
+        self.assertEqual(datetime.datetime, type(self.BaseModel1.created_at))
+        self.assertEqual(my_model_json['__class__'],
+                         self.BaseModel1.__class__.__name__)
+        self.assertEqual(my_model_json['id'], self.BaseModel1.id)
+
+    def test_unique_id(self):
+        """Test if each instance is created with a unique ID.
+        """
+        basemodel2 = self.BaseModel1.__class__()
+        basemodel3 = self.BaseModel1.__class__()
+        basemodel4 = self.BaseModel1.__class__()
+        self.assertNotEqual(self.BaseModel1.id, basemodel2.id)
+        self.assertNotEqual(self.BaseModel1.id, basemodel3.id)
+        self.assertNotEqual(self.BaseModel1.id, basemodel4.id)
+
+    def test__str__(self):
+        """Test if __str__ method returns expected string.
+        """
+        string = str(self.BaseModel1)
+        id_test = "[BaseModel] ({})".format(self.BaseModel1.id)
+        boolean = id_test in string
+        self.assertEqual(True, boolean)
+        boolean = "updated_at" in string
+        self.assertEqual(True, boolean)
+        boolean = "created_at" in string
+        self.assertEqual(True, boolean)
+        boolean = "datetime.datetime" in string
+        self.assertEqual(True, boolean)
+
 
 if __name__ == '__main__':
     unittest.main()
