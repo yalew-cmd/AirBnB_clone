@@ -1,6 +1,5 @@
 #!/usr/bin/python3
-""" init models """
-
+"""__init__ module used to initialize a package."""
 from models.engine.file_storage import FileStorage
 
 storage = FileStorage()

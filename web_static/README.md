@@ -1,1 +1,1 @@
-create web static view
+# web_static
