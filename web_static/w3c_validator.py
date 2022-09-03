@@ -4,8 +4,11 @@ W3C validator for Holberton School
 
 For HTML and CSS files.
 
-Based on 1 API:
-- https://validator.w3.org/docs/api.html
+Based on 2 APIs:
+
+- https://validator.w3.org/nu/
+- http://jigsaw.w3.org/css-validator/validator
+
 
 Usage:
 
@@ -25,52 +28,53 @@ All errors are printed in `STDERR`
 
 Return:
 Exit status is the # of errors, 0 on Success
+
+References
+
+https://developer.mozilla.org/en-US/
+
 """
 import sys
 import requests
-import os
 
 
 def __print_stdout(msg):
     """Print message in STDOUT
     """
-    sys.stdout.buffer.write(msg.encode('utf-8'))
+    sys.stdout.write(msg)
 
 
 def __print_stderr(msg):
     """Print message in STDERR
     """
-    sys.stderr.buffer.write(msg.encode('utf-8'))
+    sys.stderr.write(msg)
 
 
-def __is_empty(file):
-    if os.path.getsize(file) == 0:
-        raise OSError("File '{}' is empty.".format(file))
-
-
-def __validate(file_path, type):
+def __analyse_html(file_path):
+    """Start analyse of HTML file
     """
-    Start validation of files
-    """
-    h = {'Content-Type': "{}; charset=utf-8".format(type)}
-    # Open files in binary mode:
-    # https://requests.readthedocs.io/en/master/user/advanced/
+    h = {'Content-Type': "text/html; charset=utf-8"}
     d = open(file_path, "rb").read()
     u = "https://validator.w3.org/nu/?out=json"
     r = requests.post(u, headers=h, data=d)
-
-    if not r.status_code < 400:
-        raise ConnectionError("Unable to connect to API endpoint.")
-
     res = []
     messages = r.json().get('messages', [])
     for m in messages:
-        # Capture files that have incomplete or broken HTML
-        if m['type'] == 'error' or m['type'] == 'info':
-            res.append("'{}' => {}".format(file_path, m['message']))
-        else:
-            res.append("[{}:{}] {}".format(
-                file_path, m['lastLine'], m['message']))
+        res.append("[{}:{}] {}".format(file_path, m['lastLine'], m['message']))
+    return res
+
+
+def __analyse_css(file_path):
+    """Start analyse of CSS file
+    """
+    d = {'output': "json"}
+    f = {'file': (file_path, open(file_path, 'rb'), 'text/css')}
+    u = "http://jigsaw.w3.org/css-validator/validator"
+    r = requests.post(u, data=d, files=f)
+    res = []
+    errors = r.json().get('cssvalidation', {}).get('errors', [])
+    for e in errors:
+        res.append("[{}:{}] {}".format(file_path, e['line'], e['message']))
     return res
 
 
@@ -80,32 +84,20 @@ def __analyse(file_path):
     nb_errors = 0
     try:
         result = None
-
-        if file_path.endswith(".css"):
-            __is_empty(file_path)
-            result = __validate(file_path, "text/css")
-        elif file_path.endswith((".html", ".htm")):
-            __is_empty(file_path)
-            result = __validate(file_path, "text/html")
-        elif file_path.endswith(".svg"):
-            __is_empty(file_path)
-            result = __validate(file_path, "image/svg+xml")
+        if file_path.endswith('.css'):
+            result = __analyse_css(file_path)
         else:
-            allowed_files = "'.css', '.html', '.htm' and '.svg'"
-            raise OSError(
-                "File {} does not have a valid file extension.\nOnly {} are "
-                "allowed.".format(file_path, allowed_files)
-            )
+            result = __analyse_html(file_path)
 
         if len(result) > 0:
             for msg in result:
                 __print_stderr("{}\n".format(msg))
                 nb_errors += 1
         else:
-            __print_stdout("'{}' => OK\n".format(file_path))
+            __print_stdout("{}: OK\n".format(file_path))
 
     except Exception as e:
-        __print_stderr("'{}' => {}\n".format(e.__class__.__name__, e))
+        __print_stderr("[{}] {}\n".format(e.__class__.__name__, e))
     return nb_errors
 
 

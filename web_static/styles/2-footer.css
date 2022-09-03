@@ -1,13 +1,14 @@
-/* footer CSS */
-
 footer {
-	background-color: #00FF00;
-	height: 60px;
-	height: 60px;
-	bottom:0;
+  position: fixed;
+  bottom: 0;
+  background-color: #00FF00;
+  height:60px;
+  width:100%
+}
+
+span.footer_placeholder {
+  top: 50%;
+  left: 50%;
   position: absolute;
-  width: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center
+  transform: translate(-50%,-50%);
 }

@@ -1,21 +1,12 @@
 #!/usr/bin/python3
-"""Defines a class Review  that inherits from BaseModel"""
+"""Define Review class which inherits the BaseModel class. """
+
 from models.base_model import BaseModel
 
 
-class Review (BaseModel):
-    """Class that defines properties of Review .
+class Review(BaseModel):
+    '''Representation of Review Class.'''
 
-    Attributes:
-        place_id (string): id of city.
-        user_id (string): id of user.
-        text (string): just a text.
-    """
-    place_id = ""
-    user_id = ""
-    text = ""
-
-    def __init__(self, *args, **kwargs):
-        """Creates new instances of Review.
-        """
-        super().__init__(*args, **kwargs)
+    place_id = ''
+    user_id = ''
+    text = ''

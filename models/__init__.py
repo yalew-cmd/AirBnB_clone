@@ -1,7 +1,5 @@
 #!/usr/bin/python3
-"""Creates a unique file storage for the app.
-"""
-
+""" init models """
 
 from models.engine.file_storage import FileStorage
 

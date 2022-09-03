@@ -1,17 +1,9 @@
 #!/usr/bin/python3
-"""Defines a class Amenity that inherits from BaseModel"""
+"""Define Amenity class which inherits the BaseModel class."""
+
 from models.base_model import BaseModel
 
-
 class Amenity(BaseModel):
-    """Class that defines properties of Amenity.
+    '''Representation of Amenity Class Definition.'''
 
-    Attributes:
-        name (string): name of amenity.
-    """
-    name = ""
-
-    def __init__(self, *args, **kwargs):
-        """Creates new instances of Amenity.
-        """
-        super().__init__(*args, **kwargs)
+    name = ''
